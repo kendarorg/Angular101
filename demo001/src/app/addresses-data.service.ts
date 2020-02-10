@@ -22,6 +22,16 @@ export class AddressesDataService {
   public getAddresses():Array<AddressElement>{
     return this.addresses;
   }
+  
+  public getById(id:number){
+  	var addresses = this.getAddresses();
+  	for(var  i=0;i<addresses.length;i++){
+  		if(addresses[i].id==id){
+  			return addresses[i];
+  		}
+  	}
+  	return null;
+  }
 }
 
 export interface AddressElement {

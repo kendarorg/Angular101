@@ -11,7 +11,7 @@ Then you can install the angular cli
 
 Now go into the dir and run
 
-	ng new demoApp
+	ng new demo001
 
 Choosing to add Routing and Less. This will create an application stub... and happily go to take a coffee break!
 
@@ -22,7 +22,7 @@ Choosing to add Routing and Less. This will create an application stub... and ha
 
 ### Root
 
-The directory demoApp is created, and contains several other subdirectories:
+The directory demo001 is created, and contains several other subdirectories:
 
  * node_modules: all the node stuffs download for the project, that is added directly to the .gitignore file
  * src: containing the real source files
@@ -186,14 +186,9 @@ Then the constructor must be changed to include the data service just imported a
 We can now add the initialization with the onInit method and a function to select the...selected address, with the relative fields.
 
 	addresses: Array<AddressElement>;
-	selectedAddress: AddressElement;
   
 	ngOnInit(): void {
 		this.addresses = this.dataService.getAddresses();
-	}
-	
-	public selectAddress(address){
-		this.selectedAddress = address;
 	}
 
 Finally a variable containing the the columns to show is added
@@ -254,3 +249,200 @@ Finally to add some style, inside the addresses.component.less set the width to 
 Now the result should be something like this:
 
 ![mat-table](angular101.mat-table.png)
+
+
+## The detail
+
+Now i would like to show a single item. First we setup the component stub inside the project root dir
+
+	ng generate component SingleAddress
+
+This will generate a directory single-address with the stub for the new component
+
+### Components
+
+Inside the app.module.ts we add two new Material modules, the button, the icon and the form, importing them
+
+	import { MatButtonModule } from '@angular/material/button';
+	import { MatIconModule } from '@angular/material/icon';
+	import {FormsModule} from '@angular/forms';
+
+And using them inside the @NgModule
+
+	@NgModule({
+		...
+		imports: [
+			...
+			MatButtonModule,
+			MatIconModule,
+			FormsModule,
+		],
+
+Inside the app.component.html a new css is included to get all the Material icons
+
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+#### Self-hosting material icons
+
+This part is copy pasted directly from [http://google.github.io](http://google.github.io/material-design-icons/#icon-font-for-the-web) no responsibility taken for this!
+
+For those looking to self host the web font, some additional setup is necessary. Host the [icon font](https://github.com/google/material-design-icons/tree/master/iconfont) in a location, for example https://example.com/material-icons.woff and add the following CSS rule:
+
+	@font-face {
+	  font-family: 'Material Icons';
+	  font-style: normal;
+	  font-weight: 400;
+	  src: url(https://example.com/MaterialIcons-Regular.eot); /* For IE6-8 */
+	  src: local('Material Icons'),
+	    local('MaterialIcons-Regular'),
+	    url(https://example.com/MaterialIcons-Regular.woff2) format('woff2'),
+	    url(https://example.com/MaterialIcons-Regular.woff) format('woff'),
+	    url(https://example.com/MaterialIcons-Regular.ttf) format('truetype');
+	}
+
+In addition, the CSS rules for rendering the icon will need to be declared to render the font properly. These rules are normally served as part of the Google Web Font stylesheet, but will need to be included manually in your projects when self-hosting the font:
+
+	.material-icons {
+	  font-family: 'Material Icons';
+	  font-weight: normal;
+	  font-style: normal;
+	  font-size: 24px;  /* Preferred icon size */
+	  display: inline-block;
+	  line-height: 1;
+	  text-transform: none;
+	  letter-spacing: normal;
+	  word-wrap: normal;
+	  white-space: nowrap;
+	  direction: ltr;
+	
+	  /* Support for all WebKit browsers. */
+	  -webkit-font-smoothing: antialiased;
+	  /* Support for Safari and Chrome. */
+	  text-rendering: optimizeLegibility;
+	
+	  /* Support for Firefox. */
+	  -moz-osx-font-smoothing: grayscale;
+	
+	  /* Support for IE. */
+	  font-feature-settings: 'liga';
+	}
+
+
+### Routing
+
+First we need to be able to call the new component and we add therefore the component inside app-routing.module.ts
+
+	import { SingleAddressComponent } from './single-address/single-address.component'; 
+
+And then two new routes, one for the list (to respect the REST standard) and one for the single resulting in the following code
+
+
+	const routes: Routes = [
+		{path: "", component: AddressesComponent}, 
+		{path: "address", component: AddressesComponent}, 
+		{path: "address/:id", component: SingleAddressComponent}, 
+	];
+
+Noticed the **:id** this is to intend that the path will be in the form "address/123" to get exactly the required address
+
+### Modifying the list
+
+A new button is added to the table in addresses.component.html. This will follow the **routerLink** that we specified inside the routing. Note the slash in front of the address. This will make the address absolute!
+
+	<ng-container matColumnDef="view">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let element">
+        <button mat-icon-button routerLink="/address/{{element.id}}">
+          <mat-icon>view</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+Now clicking on the link you will be redirected to a fantastic "single-address works!"
+
+### Retrieving the data from the route
+
+Inside the SingleAddressComponent we need to retrieve the routed data, through the Activated Route service 
+
+	import { ActivatedRoute } from '@angular/router';
+
+That is injected inside the single-address.components.ts
+
+	addressId: number;
+	constructor(private activatedRoute: ActivatedRoute) { 
+		this.addressId = this.activatedRoute.snapshot.params.id;
+	}
+
+At this point we can show it inside the single-address.component.html. The message now contains the id of the clicked element
+
+	<p>single-address {{addressId}} works!</p>
+
+### Preparing the service
+
+The service will have a new method getById with a number parameters
+  
+	public getById(id:number){
+		var addresses = this.getAddresses();
+		for(var  i=0;i<addresses.length;i++){
+			if(addresses[i].id==id){
+				return addresses[i];
+			}
+		}
+		return null;
+	}
+
+### Showing the data
+
+We need then to import the data service and add it to the constructor
+
+	import { AddressesDataService, AddressElement } from '../addresses-data.service';
+
+	...
+	address:AddressElement;
+
+	constructor(private activatedRoute: ActivatedRoute,
+			public dataService: AddressesDataService) { 
+		this.addressId = this.activatedRoute.snapshot.params.id;
+		this.address = this.dataService.getById(this.addressId);
+	}
+
+Loading the page will load a new address! And we can change the text, but nothing changes :D
+
+	<p>single-address {{address.id}} works!</p>
+
+### The detail template
+
+Now it's possible to show all item data
+
+	<h2>Selected Address</h2>
+	<label>Name
+	  <input type="text" [(ngModel)]="address.name">
+	</label>
+	<label>SKU
+	  <input type="text" [(ngModel)]="address.address">
+	</label>
+	<label>Description
+	  <input type="text" [(ngModel)]="address.email">
+	</label>
+
+With a decent css
+
+	.products {
+	  padding: 2rem;
+	}
+	
+	label, input {
+	  display: block;
+	}
+	
+	label {
+	  margin-bottom: 1rem;
+	}
+
+Resulting in the following awesome screen
+
+![detail](angular101.detail.png)
+
+
+## Editing the detail
+
