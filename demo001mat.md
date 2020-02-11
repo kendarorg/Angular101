@@ -1,10 +1,16 @@
 Aim of this tutorial is building a small app for an address book demonstrating a basic CRUD (Create Read Update Delete) application
 
-This example is based on Material Library. The bootstrap version is on page [demo001boot](demo001boot)
+This example is based on Material Library. <!-- The bootstrap version is on page [demo001boot](demo001boot) -->
+
+ * [Installation](#l001)
+ * [The generated app](#l002)
+ * [The list of addresses](#l003)
+ * [The detail](#l004)
+ * [Editing the detail](#l005)
+ * [Validation](#l005)
 
 
-
-## Installation
+## <a name="l001"></a> Installation
 
 Download node js from [Kendar.org](http://www.kendar.org/?p=/system/portableservers) and extract the Nod 12.13.1 in your preferred directory. Starting pnodejs.bat will start the environment. Then go in you project dir to get started. I choose "C:\Angular101".
 
@@ -21,7 +27,7 @@ Choosing to add Routing and Less. This will create an application stub... and ha
  * Routing: The client routing for angular
  * Less: A system to write css following an "Object oriented" approach
 
-## The generated app
+## <a name="l002"></a>The generated app
 
 ### Root
 
@@ -81,7 +87,7 @@ To clean up all the mess the content of the app.component.html can be switched t
 
 Re-running the serve command will lead to an empty page! :D
 
-## The list of addresses
+## <a name="l003"></a>The list of addresses
 
 Let's start showing the list of addresses
 
@@ -262,7 +268,7 @@ Now the result should be something like this:
 ![mat-table](angular101.mat-table.png)
 
 
-## The detail
+## <a name="l004"></a>The detail
 
 Now i would like to show a single item. First we setup the component stub inside the project root dir
 
@@ -465,7 +471,7 @@ Resulting in the following awesome screen
 ![detail](angular101.detail.png)
 
 
-## Editing the detail
+## <a name="l005"></a>Editing the detail
 
 ### New items
 
@@ -616,7 +622,7 @@ Finally i need to add the parameter to the function calls inside the template
 	    </button>
 	</span>
 
-## Validation
+## <a name="l006"></a>Validation
 
 These are the main validators present in Angular Forms
 
@@ -649,12 +655,6 @@ Insert the type of field, "email". Notice the addition of the empty "email" attr
 		[disabled]="readonly" [(ngModel)]="address.email">
 	</label>
 
-Inside the button functions we can then add the form that will be used for the validation. Please notice that "userForm" is the sharp name set inside the form tag attributes.
-
-    ...
-	<button mat-icon-button  color="primary" (click)="save(userForm,'/address')" >
-    ...
-
 #### MinLength
 
 I want event that the Address field contains at least 5 chars
@@ -662,6 +662,14 @@ I want event that the Address field contains at least 5 chars
 	<label>Address
 	  <input minlength="5" name="address" [disabled]="readonly" [(ngModel)]="address.address">
 	</label>
+
+#### Finally
+
+Inside the button functions we can then add the form that will be used for the validation. Please notice that "userForm" is the sharp name set inside the form tag attributes.
+
+    ...
+	<button mat-icon-button  color="primary" (click)="save(userForm,'/address')" >
+    ...
 
 ### Controller
 
