@@ -19,18 +19,48 @@ export class AddressesDataService {
     {id: 8, name: "Contact H", address: "D road", email: "h@e.com"}
   ];
   
+  private clone<T>(a: T): T {
+	  return JSON.parse(JSON.stringify(a));
+	}
+	
   public getAddresses():Array<AddressElement>{
-    return this.addresses;
+  	var result= [] as AddressElement[];
+  	for(var  i=0;i< this.addresses.length;i++){
+  		result.push(this.clone(this.addresses[i]));
+  	}
+    return result;
   }
   
   public getById(id:number){
-  	var addresses = this.getAddresses();
-  	for(var  i=0;i<addresses.length;i++){
-  		if(addresses[i].id==id){
-  			return addresses[i];
+  	for(var  i=0;i< this.addresses.length;i++){
+  		if(this.addresses[i].id==id){
+  			return this.clone(this.addresses[i]);
   		}
   	}
   	return null;
+  }
+  
+  private getLastIndex(){
+  	var maxIndex = 0;
+  	for(var  i=0;i< this.addresses.length;i++){
+  		if(this.addresses[i].id>maxIndex){
+  			maxIndex= this.addresses[i].id;
+  		}
+  	}
+  	return maxIndex+1;
+  }
+  
+  public save(item:AddressElement){
+  	if(item.id==undefined){
+  		item.id=this.getLastIndex();
+  		this.addresses.push(this.clone(item));
+  	}else{
+  		for(var  i=0;i< this.addresses.length;i++){
+	  		if(this.addresses[i].id==item.id){
+	  			this.addresses[i]=this.clone(item);
+	  		}
+	  	}
+  	}
   }
 }
 

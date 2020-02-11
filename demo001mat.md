@@ -1,5 +1,8 @@
 Aim of this tutorial is building a small app for an address book demonstrating a basic CRUD (Create Read Update Delete) application
 
+This example is based on Material Library. The bootstrap version is on page [demo001boot](demo001boot)
+
+
 
 ## Installation
 
@@ -139,7 +142,11 @@ Generating two files
  * addresses-data.service.spec.ts: The data service test
  * addresses-data.service.ts: The data service itself
 
+Something special for this example is a clone method to consume and produce only cloned items. This way the content of the data storage will be disconnected from the ui
 
+	  	private clone<T>(a: T): T {
+		  return JSON.parse(JSON.stringify(a));
+		}
 
 Now we can fill the latter  with some fake data inside the class declaration. Note the type declaration, array of AddressElement
 
@@ -155,7 +162,11 @@ Now we can fill the latter  with some fake data inside the class declaration. No
 	  ];
 	  
 	  public getAddresses():Array<AddressElement>{
-	    return this.addresses;
+	  	var result= [] as AddressElement[];
+	  	for(var  i=0;i< this.addresses.length;i++){
+	  		result.push(this.clone(this.addresses[i]));
+	  	}
+	    return result;
 	  }
 
 Let's examine a bit more. Before the class declaration there is an annotation. This is needed by all the services. It means that the service will be "stored" inside the root dependency injection context.
@@ -373,6 +384,12 @@ That is injected inside the single-address.components.ts
 		this.addressId = this.activatedRoute.snapshot.params.id;
 	}
 
+And used inside the onInit
+
+	ngOnInit(): void {
+		this.addressId = this.activatedRoute.snapshot.params.id;
+	}
+
 At this point we can show it inside the single-address.component.html. The message now contains the id of the clicked element
 
 	<p>single-address {{addressId}} works!</p>
@@ -381,19 +398,18 @@ At this point we can show it inside the single-address.component.html. The messa
 
 The service will have a new method getById with a number parameters
   
-	public getById(id:number){
-		var addresses = this.getAddresses();
-		for(var  i=0;i<addresses.length;i++){
-			if(addresses[i].id==id){
-				return addresses[i];
-			}
-		}
-		return null;
-	}
+	  public getById(id:number){
+	  	for(var  i=0;i< this.addresses.length;i++){
+	  		if(this.addresses[i].id==id){
+	  			return this.clone(this.addresses[i]);
+	  		}
+	  	}
+	  	return null;
+	  }
 
 ### Showing the data
 
-We need then to import the data service and add it to the constructor
+We need then to import the data service and add it to the constructor,
 
 	import { AddressesDataService, AddressElement } from '../addresses-data.service';
 
@@ -402,6 +418,11 @@ We need then to import the data service and add it to the constructor
 
 	constructor(private activatedRoute: ActivatedRoute,
 			public dataService: AddressesDataService) { 
+	}
+
+And used inside the onInit
+
+	ngOnInit(): void {
 		this.addressId = this.activatedRoute.snapshot.params.id;
 		this.address = this.dataService.getById(this.addressId);
 	}
@@ -418,7 +439,7 @@ Now it's possible to show all item data
 	<label>Name
 	  <input type="text" [(ngModel)]="address.name">
 	</label>
-	<label>SKU
+	<label>Address
 	  <input type="text" [(ngModel)]="address.address">
 	</label>
 	<label>Description
@@ -446,3 +467,263 @@ Resulting in the following awesome screen
 
 ## Editing the detail
 
+### New items
+
+Now we need to add a state to the component class to define when the whole thing will be editable
+
+	readonly = true;
+  
+	edit(){
+		this.readonly=false;
+	}
+  
+	cancel(){
+		this.readonly=true;
+	}
+  
+	save(){
+		this.readonly=true;
+	}
+
+And some addition to the template fields. Notice the square brackets. With this approach we can insert code directly inside the template to define the expected behaviour
+
+	<input type="text" [(ngModel)]="address.name"
+		[disabled]="readonly">
+
+And the buttons to show what to do! Here we are introducing the *ngIf command that "render" the following part when the condition expression is verified
+
+
+	<span *ngIf="readonly">
+		<button mat-icon-button  color="primary" (click)="edit()">
+	      <mat-icon>edit</mat-icon>
+	    </button>
+		<button mat-icon-button  color="primary" routerLink="/address">
+	      <mat-icon>close</mat-icon>
+	    </button>
+	</span>
+	<span *ngIf="!readonly">
+		<button mat-icon-button  color="primary" (click)="save()" >
+	      <mat-icon>save</mat-icon>
+	    </button>
+		<button mat-icon-button  color="primary" (click)="cancel()">
+	      <mat-icon>cancel</mat-icon>
+	    </button>
+	</span>
+
+### Modify an existing item
+
+Now first is needed a function to save the data on the service. 
+	
+	  public save(item:AddressElement){
+	  		for(var  i=0;i< this.addresses.length;i++){
+		  		if(this.addresses[i].id==item.id){
+		  			this.addresses[i]=this.clone(item);
+		  		}
+		  	}
+	  }
+
+And invoke that from the methods!
+
+	save(){
+		this.readonly=false;
+		this.dataService.save(address);
+	}
+
+Now we can modify the items! Click on an item, modify it, close the detail and go back to the list. The item is modified!
+
+### Insert a new item
+
+A first change is needed in the save() function in the service, to generate a new id. Notice that we are doing an upsert: insert new if the id is not set. In TS by default the value of an uninitialized field is "undefined"
+
+  
+	  private getLastIndex(){
+	  	var maxIndex = 0;
+	  	for(var  i=0;i< this.addresses.length;i++){
+	  		if(this.addresses[i].id>maxIndex){
+	  			maxIndex= this.addresses[i].id;
+	  		}
+	  	}
+	  	return maxIndex+1;
+	  }
+	  
+	  public save(item:AddressElement){
+	  	if(item.id==undefined){
+	  		item.id=this.getLastIndex();
+	  		this.addresses.push(this.clone(item));
+	  	}else{
+	  		for(var  i=0;i< this.addresses.length;i++){
+		  		if(this.addresses[i].id==item.id){
+		  			this.addresses[i]=this.clone(item);
+		  		}
+		  	}
+	  	}
+	  }
+
+We can now add a new button on the addresses list template. Notice the usage of the "-1" parameter to inform the system that we are adding a new item!
+
+	<button mat-icon-button  color="primary" routerLink="/address/-1">
+	      <mat-icon>add</mat-icon>
+	</button>
+
+Then we can proceed changing the SingleAddressComponent. When the id "-1" arrives, a new empty address is created and the state is directly set to "not readonly" modifying the constructor.
+
+	ngOnInit(): void {
+		this.addressId = this.activatedRoute.snapshot.params.id;
+		if(this.addressId==-1){
+			this.address = {} as AddressElement;
+			this.readonly = false;
+		}else{
+			this.address = this.dataService.getById(this.addressId);
+		}
+	}
+
+
+
+Now when saving the new item we go back to the "view" form. It would be better to go back to the list! We can use the this.activatedRoute.snapshot.params.id already present and modify accordingly cancel and save functions. But first we need to include the router!!
+
+	import { Router } from "@angular/router"
+
+	...
+	constructor(private activatedRoute: ActivatedRoute,
+			public dataService: AddressesDataService,
+			private router: Router) { 
+
+And then the functions. Notice that i had choose to pass the redirect path as a parameter. This is to further isolate the presentation parts
+
+	  cancel(path:string){
+	  	this.readonly=true;
+	  	if(this.addressId==-1){
+	  		this.router.navigateByUrl(path);
+	  	}
+	  }
+	  
+	  save(path:string){
+	  	this.dataService.save(this.address);
+		this.readonly=true;
+	  	if(this.addressId==-1){
+	  		this.router.navigateByUrl(path);
+	  	}
+	  }
+
+Finally i need to add the parameter to the function calls inside the template
+
+	<span *ngIf="!readonly">
+		<button mat-icon-button  color="primary" (click)="save('/address')" >
+	      <mat-icon>save</mat-icon>
+	    </button>
+		<button mat-icon-button  color="primary" (click)="cancel('/address')">
+	      <mat-icon>cancel</mat-icon>
+	    </button>
+	</span>
+
+## Validation
+
+These are the main validators present in Angular Forms
+
+ * min(number)
+ * max(number)
+ * required
+ * requiredTrue
+ * email
+ * minLength(number)
+ * maxLength(number)
+ * pattern(regExp string)
+
+### Template
+
+#### Email
+
+Let's try to add the email validator to our function. First we wrap the single address component with a form. On the "blur" event (notice the round brackets that denotes a DOM event) 
+
+	<form #userForm="ngForm" (blur)="userForm.form.updateValueAndValidity()">
+		...
+	</form>
+
+Insert the type of field, "email". Notice the addition of the empty "email" attribute the type and the name
+
+	<label>Email
+	  <input 
+		email 
+		type="email" 
+		name="email" 
+		[disabled]="readonly" [(ngModel)]="address.email">
+	</label>
+
+Inside the button functions we can then add the form that will be used for the validation. Please notice that "userForm" is the sharp name set inside the form tag attributes.
+
+    ...
+	<button mat-icon-button  color="primary" (click)="save(userForm,'/address')" >
+    ...
+
+#### MinLength
+
+I want event that the Address field contains at least 5 chars
+
+	<label>Address
+	  <input minlength="5" name="address" [disabled]="readonly" [(ngModel)]="address.address">
+	</label>
+
+### Controller
+
+Inside the controller we now accept the form. That has the type NgForm, that must be imported
+
+	import { NgForm } from "@angular/forms"
+
+Then the save function will change to verify the form validty
+
+	save(userForm:NgForm, path:string){
+		if(!userForm.form.valid){
+			return;
+		}
+		
+		this.dataService.save(this.address);
+		this.readonly=true;
+		if(this.addressId==-1){
+			this.router.navigateByUrl(path);
+		}
+	}
+
+And the cancel function will reset the value of the data
+
+	cancel(path:string){
+		this.readonly=true;
+		if(this.addressId==-1){
+			this.router.navigateByUrl(path);
+		}else{
+			this.address = this.dataService.getById(this.addressId);
+		}
+	}
+
+### Showing errors
+
+Let's add a couple of css classes in the global styles.css
+
+	.fieldKo{
+		background-color: #ebcacc;
+	}
+	.fieldOk{
+		background-color: #cdf2cb;
+	}
+
+Let's take the email field and modify it. 
+
+ * ngModel: bind the controller linked with this input with the name "email
+ * class: set the color of the background according to the "visualization" of the controller
+
+	<label>Email
+	  <input email type="email"  
+	  	#email="ngModel" name="email" 
+	  	[class]="email.valid || email.disabled?'fieldOk':'fieldKo'" 
+	  	[disabled]="readonly" 
+	  	[(ngModel)]="address.email">
+	</label>
+
+Now changing the email with the wrong value will show an error! The same for the address field. Notice the usage of "addr" instead of "address" this is to avoid naming conflicts with the variable assigned to [(ngModel)]
+
+	<label>Address
+	  <input minlength="5" name="address" [disabled]="readonly" [(ngModel)]="address.address"
+	  	#addr="ngModel"
+		[class]="addr.valid || addr.disabled?'fieldOk':'fieldKo'">
+	</label>
+
+![validation](angular101.mat-validation.png)
