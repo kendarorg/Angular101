@@ -2,6 +2,12 @@ We will create a small REST Api with express
 
  * [Setup](#l001)
  * [Simple handler](#l002)
+ * [Handling pagination](#l003)
+
+The first part:
+
+ * [Setup](README.md)
+ * [Chapter 1: Basic addressbook app](demo001mat.md)
 
 ## <a name="l001"></a> Setup
 
@@ -147,7 +153,7 @@ That can then be called like
 
 	curl http://localhost:4201/api/address/2 -X DELETE
 
-## Handling pagination
+## <a name="l003"></a> Handling pagination
 
 ### Fill with data
 

@@ -9,10 +9,13 @@ This example is based on Material Library. <!-- The bootstrap version is on page
  * [Editing the detail](#l005)
  * [Validation](#l005)
 
+The rest:
+
+ * [Setup](README.md)
+ * [Chapter 2 preparation: Rest API with express](demo002srv.md)
+ * [Chapter 2: Header, Footer, Menu, Real API, Authentication](demo002mat.md)
 
 ## <a name="l001"></a> Installation
-
-Download node js from [Kendar.org](http://www.kendar.org/?p=/system/portableservers) and extract the Nod 12.13.1 in your preferred directory. Starting pnodejs.bat will start the environment. Then go in you project dir to get started. I choose "C:\Angular101".
 
 Then you can install the angular cli
 
