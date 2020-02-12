@@ -13,6 +13,10 @@ export class AddressesComponent implements OnInit {
   constructor(public dataService: AddressesDataService) { }
 
   ngOnInit(): void {
-  	this.addresses = this.dataService.getAddresses(); 
+  	this.dataService.getAddresses().subscribe((data: {}) => {
+  		console.log(data);
+      //this.addresses = data;
+      
+    }); 
   }
 }

@@ -10,13 +10,24 @@ import { SingleAddressComponent } from './single-address/single-address.componen
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import {FormsModule} from '@angular/forms';
+import { FormsModule} from '@angular/forms';
+import { HeaderComponent } from './header/header.component';
+import { FooterComponent } from './footer/footer.component';
 
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatMenuModule } from '@angular/material/menu';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { HttpClientModule } from '@angular/common/http';
+ 
 @NgModule({
   declarations: [
     AppComponent,
     AddressesComponent,
-    SingleAddressComponent
+    SingleAddressComponent,
+    HeaderComponent,
+    FooterComponent
   ],
   imports: [
     BrowserModule,
@@ -25,6 +36,11 @@ import {FormsModule} from '@angular/forms';
     MatButtonModule,
     MatIconModule,
     FormsModule,
+    MatToolbarModule,
+    MatMenuModule,
+    FlexLayoutModule,
+    BrowserAnimationsModule,
+    HttpClientModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

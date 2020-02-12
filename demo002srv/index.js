@@ -1,8 +1,9 @@
 	var express = require("express");
+	const cors = require('cors');
 	var port = 4201;
 	var app = express();
 	
-	app.get("/api/ping", (req, res, next) => {
+	app.get("/api/ping",cors(), (req, res, next) => {
 	 	res.send("pong");
 	});
 	
@@ -13,7 +14,7 @@
 	
 	app.use(express.json())
 	
-	app.post("/api/address", (req, res, next) => {
+	app.post("/api/address",cors(), (req, res, next) => {
 	 	var newAddress= req.body;
 	 	var maxId=0;
 		for(var i=0;i< addresses.length; i++){
@@ -29,7 +30,7 @@
 	 	res.status(200).end();
 	});
 	
-	app.get("/api/address/:id", (req, res, next) => {
+	app.get("/api/address/:id",cors(), (req, res, next) => {
 		var id = parseInt(req.params.id);
 	 	for(var i=0;i< addresses.length; i++){
 			if(addresses[i].id==id){
@@ -40,7 +41,7 @@
 	 	res.status(404).end();
 	});
 	
-	app.delete("/api/address/:id", (req, res, next) => {
+	app.delete("/api/address/:id",cors(), (req, res, next) => {
 		var id = parseInt(req.params.id);
 	 	for(var i=0;i< addresses.length; i++){
 			if(addresses[i].id==id){
@@ -52,11 +53,7 @@
 	 	res.status(200).end();
 	});
 	
-	app.listen(port, () => {
-		console.log("Server running on " + port);
-	});
-	
-	app.get("/api/address", (req, res, next) => {
+	app.get("/api/address", cors(),(req, res, next) => {
 		var page=0;
 		var pageSize=9999;
 		if(req.header('X-Page')!=undefined){
@@ -74,6 +71,10 @@
 		res.set('X-Count',addresses.length);
 		res.set('X-PageCount',result.length);
 	 	res.json(result);
+	});
+	
+	app.listen(port, () => {
+		console.log("Server running on " + port);
 	});
 	//req.header('User-Agent')
 	//res.set('Content-Type', 'text/html')

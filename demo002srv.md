@@ -20,6 +20,7 @@ Then create the dir demo002srv enter it and then the following to create the pro
 
 	npm init
 	npm install express --save
+	npm install cors --save
 
 Finally you can create a new file index.js that contains the listener
 
