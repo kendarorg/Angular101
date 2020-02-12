@@ -14,9 +14,7 @@ export class AddressesComponent implements OnInit {
 
   ngOnInit(): void {
   	this.dataService.getAddresses().subscribe((data: {}) => {
-  		console.log(data);
-      //this.addresses = data;
-      
+      this.addresses = data as AddressElement[];
     }); 
   }
 }
