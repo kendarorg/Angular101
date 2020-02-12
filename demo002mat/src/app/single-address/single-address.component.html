@@ -1,0 +1,36 @@
+<h2>Selected Address</h2>
+
+<form #userForm="ngForm" (blur)="userForm.form.updateValueAndValidity()" novalidate>
+	<label>Name
+	  <input type="text" name="name" [disabled]="readonly" [(ngModel)]="address.name">
+	</label>
+	<label>Address
+	  <input minlength="5" name="address" [disabled]="readonly" [(ngModel)]="address.address"
+	  	#addr="ngModel" [class]="addr.valid || addr.disabled?'fieldOk':'fieldKo'">
+	</label>
+	<label>Email
+	  <input email type="email"  
+	  	#email="ngModel" name="email" 
+	  	[class]="email.valid || email.disabled?'fieldOk':'fieldKo'" 
+	  	[disabled]="readonly" 
+	  	[(ngModel)]="address.email">
+	</label>
+
+	<span *ngIf="readonly">
+		<button mat-icon-button  color="primary" (click)="edit()">
+	      <mat-icon>edit</mat-icon>
+	    </button>
+		<button mat-icon-button  color="primary" routerLink="/address">
+	      <mat-icon>close</mat-icon> 
+	    </button>
+	</span>
+	<span *ngIf="!readonly">
+		<button mat-icon-button  color="primary" (click)="save(userForm,'/address')" >
+	      <mat-icon>save</mat-icon>
+	    </button>
+		<button mat-icon-button  color="primary" (click)="cancel('/address')">
+	      <mat-icon>cancel</mat-icon>
+	    </button>
+	</span>
+	
+</form>
