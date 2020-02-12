@@ -4,10 +4,11 @@ We will create a small REST Api with express
  * [Simple handler](#l002)
  * [Handling pagination](#l003)
 
-The first part:
+The rest:
 
  * [Setup](README.md)
  * [Chapter 1: Basic addressbook app](demo001mat.md)
+ * [Chapter 2: Header, Footer, Menu, Real API, Authentication](demo002mat.md)
 
 ## <a name="l001"></a> Setup
 
