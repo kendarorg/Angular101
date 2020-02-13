@@ -10,6 +10,7 @@ Then we will connect the application to a "real" rest api, using the material Da
  * [Toolbar](#l003)
  * [Adding the submenu](#l004)
  * [Using a real REST Api](#l005)
+ * [The Material Data Source](#l006)
 
 The rest:
 
@@ -129,6 +130,8 @@ Or when expanded
 
 Before this step you should follow the [2 part preparation](demo002srv.md)
 
+### Global files
+
 Should import the http client inside the app.module
 
 	import { HttpClientModule } from '@angular/common/http';
@@ -140,11 +143,101 @@ Adding it to the imports
 	    HttpClientModule,
 	  ],
 
-Now we modify the data service adding the dependency from httpClient (of course importing HttpClient) and a variable with the base url for the api
+### The data service
+
+Now we modify the data service adding the dependency from httpClient (of course importing HttpClient) and a variable with the base url for the api, with it we add the Observable and the Subject (or subscriber for observable). This is part of reactive Js (rxjs) and is needed to handle the notification of the result of the call to the services
 
 	import { HttpClient } from '@angular/common/http';
+	import { Observable, Subject } from 'rxjs';
 	...
 		baseUrl:string = 'http://localhost:4201/api/address';
 		constructor(private http: HttpClient) { } 
 
-Let's start with the getAddresses
+Let's start with the getAddresses. It returns an Observable. NOT the result data but a promise to fulfill the request. Notice the return value added! (:Observable<AddressElement>)
+	
+	  public getAddresses():Observable<AddressElement>{
+	  	return this.http.get<AddressElement>(this.baseUrl);
+	  }
+
+
+We can remove the list of pre-filled addresses and the "clone" stuff.
+
+### The addresses component
+
+Now that the return value of getAddresses is changed, we need to setup how the observable is handled. Inside the onIniti we need to give to subscribe with a callback (data:{}) to the promise. We know that the content will be an array of AddressElement thus it needs to be casted!
+
+	  ngOnInit(): void {
+	  	this.dataService.getAddresses().subscribe((data: {}) => {
+	      this.addresses = data as AddressElement[];
+	    }); 
+	  }
+
+When the request of items will be completed, the addresses array will be filled
+
+Now running (and filling) the REST server and running the app will let us see the list of items!
+
+### Get by id
+
+Let's change first the service. Notice the return value added! (:Observable<AddressElement>)
+
+	  public getById(id:number):Observable<AddressElement>{
+	  	return this.http.get<AddressElement>(this.baseUrl+"/"+id);
+	  }
+
+And then the single-address.component.ts. Notice that we are still casting the item, and in case of a new item nothing is changed! 
+
+Another special thing is the initialization of an empty object. This is needed to have some "real" value shown before the REST call result.
+
+	ngOnInit(): void {
+		...
+		}else{
+			this.address = {} as AddressElement;
+			this.dataService.getById(this.addressId).subscribe((data: {}) => {
+		      this.address = data as AddressElement;
+		    });
+		}
+	}
+
+Same goes for the cancel path
+
+	cancel(path:string){
+		...
+		}else{
+			this.dataService.getById(this.addressId).subscribe((data: {}) => {
+		      this.address = data as AddressElement;
+		    });
+		}
+	}
+
+When a call to getById is made the system waits for the response and invoke the callback with a generic object passed, that is then cast to AddressElement
+
+You can verify all of this editing an item, modifying it and canceling: the item will be put in the previous state
+
+Another way to verify the behavior is adding a new item
+
+Now the save and delete are missing
+
+### Save
+
+As before, inside the service. Notice the return value added! (:Observable<AddressElement>)
+
+	  public save(item:AddressElement):Observable<AddressElement>{
+	  	this.http.post<AddressElement>(this.baseUrl,item);
+	  }
+
+A bit more has to be changed inside the controller. The whole part after the save() must be moved inside the callback!
+
+	save(userForm:NgForm, path:string){
+		if(!userForm.form.valid){
+			return;
+		}
+		
+		this.dataService.save(this.address).subscribe((data: {}) => {
+			this.readonly=true;
+			if(this.addressId==-1){
+				this.router.navigateByUrl(path);
+			}
+		});
+	}
+
+## <a name="l006"></a> The Material Data Source

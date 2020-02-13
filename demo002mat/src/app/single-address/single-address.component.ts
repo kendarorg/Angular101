@@ -25,7 +25,10 @@ export class SingleAddressComponent implements OnInit {
 			this.address = {} as AddressElement;
 			this.readonly = false;
 		}else{
-			this.address = this.dataService.getById(this.addressId);
+			this.address = {} as AddressElement;
+			this.dataService.getById(this.addressId).subscribe((data: {}) => {
+		      this.address = data as AddressElement;
+		    });
 		}
 	}
 	
@@ -40,7 +43,9 @@ export class SingleAddressComponent implements OnInit {
 		if(this.addressId==-1){
 			this.router.navigateByUrl(path);
 		}else{
-			this.address = this.dataService.getById(this.addressId);
+			this.dataService.getById(this.addressId).subscribe((data: {}) => {
+		      this.address = data as AddressElement;
+		    });
 		}
 	}
 
@@ -49,11 +54,12 @@ export class SingleAddressComponent implements OnInit {
 			return;
 		}
 		
-		this.dataService.save(this.address);
-		this.readonly=true;
-		if(this.addressId==-1){
-			this.router.navigateByUrl(path);
-		}
+		this.dataService.save(this.address).subscribe((data: {}) => {
+			this.readonly=true;
+			if(this.addressId==-1){
+				this.router.navigateByUrl(path);
+			}
+		});
 	}
 
 }

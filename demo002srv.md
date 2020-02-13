@@ -96,7 +96,7 @@ Then. When an address with the same id had been found, update it. Meanwhile calc
 	 	var newAddress= req.body;
 	 	var maxId=0;
 		for(var i=0;i< addresses.length; i++){
-			if(addresses[i]==newAddress.id){
+			if(addresses[i].id==newAddress.id){
 				addresses[i]=newAddress;
 	 			res.status(200).end();
 	 			return;

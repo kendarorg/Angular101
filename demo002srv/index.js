@@ -3,6 +3,7 @@
 	var port = 4201;
 	var app = express();
 	
+	app.options('*', cors());
 	app.get("/api/ping",cors(), (req, res, next) => {
 	 	res.send("pong");
 	});
@@ -18,7 +19,7 @@
 	 	var newAddress= req.body;
 	 	var maxId=0;
 		for(var i=0;i< addresses.length; i++){
-			if(addresses[i]==newAddress.id){
+			if(addresses[i].id==newAddress.id){
 				addresses[i]=newAddress;
 	 			res.status(200).end();
 	 			return;

@@ -11,4 +11,4 @@ Or install everything by hand :)
 
  * [Chapter 1: Basic addressbook app](demo001mat.md)
  * [Chapter 2 preparation: Rest API with express](demo002srv.md)
- * [Chapter 2: Header, Footer, Menu, Real API, Authentication](demo002mat.md)
+ * [Chapter 2: Header, Footer, Menu, Real API, DataSource Authentication](demo002mat.md)
