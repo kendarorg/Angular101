@@ -16,17 +16,20 @@ First let's install the library a project
 
 	npm install -g express-generator
 
-Then create the dir demo002srv enter it and then the following to create the project and install express in the app 
+Then create the dir demo002srv enter it and then the following to create the project and install express in the app. The cors module is needed to allow the Cross Origin requests to the server.
 
 	npm init
 	npm install express --save
 	npm install cors --save
 
-Finally you can create a new file index.js that contains the listener
+Finally you can create a new file index.js that contains the listener. The app.options is needed to respond to cors option requests from the client UI
 
 	var express = require("express");
+	const cors = require('cors');
 	var port = 4201;
 	var app = express();
+	
+	app.options('*', cors());
 	app.listen(port, () => {
 		console.log("Server running on " + port);
 	});
@@ -51,11 +54,11 @@ Simply add the following after the express(). This will answer with pong wheneve
 
 ### List the objects
 
-We need a variable to store all the data and a get function to retrieve those data!
+We need a variable to store all the data and a get function to retrieve those data! We tell express that this call is available for all sites, adding the cors() paramater
 
 	var addresses = [];
 
-	app.get("/api/address", (req, res, next) => {
+	app.get("/api/address", cors(),(req, res, next) => {
 	 	res.json(addresses);
 	});
 
@@ -70,7 +73,7 @@ First we have to add support for json
 
 First i try to understand what is sent (and restart the server!!) This will log the body and return a 200. Notice that the response.end() is needed to complete the request!
 
-	app.post("/api/address", (req, res, next) => {
+	app.post("/api/address",cors(), (req, res, next) => {
 	 	console.log(req.body);
 	 	res.status(200).end();
 	});
@@ -92,7 +95,7 @@ Let's suppose that the structure is the following :
 
 Then. When an address with the same id had been found, update it. Meanwhile calculate the greatest id to use when there will be an insert!
 
-	app.post("/api/address", (req, res, next) => {
+	app.post("/api/address",cors(), (req, res, next) => {
 	 	var newAddress= req.body;
 	 	var maxId=0;
 		for(var i=0;i< addresses.length; i++){
@@ -139,7 +142,7 @@ Now adding items with curl and getting them with the following will return the c
 
 Will be similar to the get
 
-	app.delete("/api/address/:id", (req, res, next) => {
+	app.delete("/api/address/:id",cors(), (req, res, next) => {
 		var id = parseInt(req.params.id);
 	 	for(var i=0;i< addresses.length; i++){
 			if(addresses[i].id==id){
@@ -188,7 +191,7 @@ And in the response
  * X-Count: the total count of objects
  * X-PageCount: the number of items returned
 
-	app.get("/api/address", (req, res, next) => {
+	app.get("/api/address",cors(), (req, res, next) => {
 		var page=0;
 		var pageSize=9999;
 		if(req.header('X-Page')!=undefined){

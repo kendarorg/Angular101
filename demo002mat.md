@@ -241,3 +241,5 @@ A bit more has to be changed inside the controller. The whole part after the sav
 	}
 
 ## <a name="l006"></a> The Material Data Source
+
+Let's start adding a new method to the service to handle the DataSource. The data source is nice because it handles all the pagination, ordering, filtering and sorting. For our example we will handle only the pagination, that was implemented via http headers on the server
