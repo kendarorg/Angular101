@@ -242,4 +242,112 @@ A bit more has to be changed inside the controller. The whole part after the sav
 
 ## <a name="l006"></a> The Material Data Source
 
-Let's start adding a new method to the service to handle the DataSource. The data source is nice because it handles all the pagination, ordering, filtering and sorting. For our example we will handle only the pagination, that was implemented via http headers on the server
+Let's start adding a new method to the service to handle the DataSource. The data source is nice because it handles all the pagination, ordering, filtering and sorting. For our example we will handle only the pagination, that was implemented via http headers on the server.
+
+### Modify the service
+
+We need to import the HttpHeaders
+
+	import { HttpClient, HttpHeaders } from '@angular/common/http';
+	import { map } from 'rxjs/operators'; 
+
+We will not use sorting and filter. Just the pagination. Notice the weird map action, used for...no reason, it just works...
+
+	 public findAddresses(
+        addressId:number, filter = '', sortOrder = 'asc',
+        pageNumber = 0, pageSize = 3):  Observable<AddressElement> {
+
+		var headers = new HttpHeaders();
+		    	
+    	var address = this.baseUrl;
+    	if(addressId>=0){
+    		address+="/"+addressId;
+    	}else{
+    		headers = headers.set('X-Page',pageNumber.toString());
+    		headers = headers.set('X-PageSize',pageSize.toString());
+    	}
+    	
+        return this.http.get(address, {headers:headers}).pipe(
+            map(res =>  {var t=res["payload"];return res;}) 
+        );
+    }
+
+### The data source stub
+
+Now we can generate the dataSource
+
+	ng generate service addressDs
+
+And setup it as a real ds, adding the basic function connect and disconnect, injecting the AddressesDataService
+
+	import {CollectionViewer, DataSource} from "@angular/cdk/collections";
+	import { AddressesDataService, AddressElement } from './addresses-data.service';
+	import { BehaviorSubject, Observable } from 'rxjs';
+	import { of } from 'rxjs'; 
+	import { catchError, finalize } from 'rxjs/operators';  
+	
+	export class AddressesDs implements DataSource<AddressElement> {
+	
+	    private loadingSubject = new BehaviorSubject<boolean>(false);
+	
+	    public loading$ = this.loadingSubject.asObservable();
+	    private addressSubject = new BehaviorSubject<AddressElement[]>([]);
+	
+	    constructor(private addressesService: AddressesDataService) {}
+	
+	    connect(collectionViewer: CollectionViewer): Observable<Lesson[]> {
+	        return this.addressSubject.asObservable();
+	    }
+	
+	    disconnect(collectionViewer: CollectionViewer): void {
+	        this.addressSubject.complete();
+	        this.loadingSubject.complete();
+	    }
+	  
+	    loadAddresses(addressId: number, filter: string,
+	                sortDirection: string, pageIndex: number, pageSize: number) {
+	      
+	    }  
+	}
+
+
+### Load Addresses
+
+Subscription to the method called essentially
+
+    loadAddresses(addressId: number, filter = '',
+                sortDirection = 'asc', pageIndex = 0, pageSize = 3) {
+
+        this.loadingSubject.next(true);
+
+        this.addressesService.findAddresses(addressId, filter, sortDirection,
+            pageIndex, pageSize).pipe(
+            catchError(() => of([])),
+            finalize(() => this.loadingSubject.next(false))
+        )
+        .subscribe(addresses => this.addressSubject.next(addresses));
+    }  
+
+### Changes in the controller
+
+The datasource must be imported
+
+	import { AddressesDs } from '../addresses-sc.service';
+
+Added to the constructor and OnInit, with a variable
+
+	dataSource: AddressesDs;
+	constructor(public dataService: AddressesDataService) {}
+	
+	ngOnInit(): void {
+		this.dataSource = new AddressesDs(this.dataService);
+		this.dataSource.loadAddresses(-1);
+	}
+
+Now in the presentation it's enough to add the data source name on the controller
+
+	<table mat-table [dataSource]="dataSource" class="mat-elevation-z1" >
+		<ng-container matColumnDef="id">
+			<th mat-header-cell *matHeaderCellDef> Id</th>
+			<td mat-cell *matCellDef="let element"> {{element.id}} </td>
+		</ng-container>

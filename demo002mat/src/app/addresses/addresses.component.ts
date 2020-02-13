@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AddressesDataService, AddressElement } from '../addresses-data.service';
+import { AddressesDs } from '../address-ds.service';
 
 @Component({
   selector: 'app-addresses',
@@ -9,12 +10,12 @@ import { AddressesDataService, AddressElement } from '../addresses-data.service'
 export class AddressesComponent implements OnInit {
   addresses: Array<AddressElement>;
   displayedColumns: string[] = ['name', 'address', 'email','view'];
-
-  constructor(public dataService: AddressesDataService) { }
+  
+  dataSource: AddressesDs;
+  constructor(public dataService: AddressesDataService) {}
 
   ngOnInit(): void {
-  	this.dataService.getAddresses().subscribe((data: {}) => {
-      this.addresses = data as AddressElement[];
-    }); 
+  	this.dataSource = new AddressesDs(this.dataService);
+    this.dataSource.loadAddresses(-1);
   }
 }

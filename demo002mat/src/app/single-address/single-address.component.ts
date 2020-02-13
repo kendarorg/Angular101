@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AddressesDataService, AddressElement } from '../addresses-data.service';
-import { Router } from "@angular/router"
-import { NgForm } from "@angular/forms"
+import { Router } from "@angular/router";
+import { NgForm } from "@angular/forms";
+import {map} from "rxjs/operators";
 
 @Component({
   selector: 'app-single-address',
