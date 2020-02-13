@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { AddressesComponent } from './addresses/addresses.component';
 
 import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { SingleAddressComponent } from './single-address/single-address.component'; 
 
 import { MatButtonModule } from '@angular/material/button';
@@ -41,6 +42,7 @@ import { HttpClientModule } from '@angular/common/http';
     FlexLayoutModule,
     BrowserAnimationsModule,
     HttpClientModule,
+    MatPaginatorModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
