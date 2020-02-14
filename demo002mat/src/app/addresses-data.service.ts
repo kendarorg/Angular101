@@ -13,20 +13,18 @@ export class AddressesDataService {
 	constructor(private http: HttpClient) { } 
 
 	public getAddresses():Observable<AddressElement>{
-	return this.http.get<AddressElement>(this.baseUrl);
+		return this.http.get<AddressElement>(this.baseUrl);
 	}
 
 	public getById(id:number):Observable<AddressElement>{
-	return this.http.get<AddressElement>(this.baseUrl+"/"+id);
+		return this.http.get<AddressElement>(this.baseUrl+"/"+id);
 	}
   
   
 	public save(item:AddressElement):Observable<AddressElement>{
-	return this.http.post<AddressElement>(this.baseUrl,item);
+		return this.http.post<AddressElement>(this.baseUrl,item);
 	}
   
-  	pageCount:number;
-  	totalCount:number;
 	public findAddresses(
 	    addressId:number = -1, filter = '', sortOrder = 'asc',
 	    pageNumber = 0, pageSize = 3):Observable<AddressResult> {
@@ -43,13 +41,13 @@ export class AddressesDataService {
 		
 	    return this.http.get(address, {headers:headers, observe: "response"}).pipe(
 	        map(res =>  {
-	        	this.pageCount =parseInt(res.headers.get('X-PageCount'));
+	        	var pageCount =parseInt(res.headers.get('X-PageCount'));
 	        	var pageIndex =parseInt(res.headers.get('X-PageIndex'));
-	        	this.totalCount =parseInt(res.headers.get('X-Count'));
+	        	var totalCount =parseInt(res.headers.get('X-Count'));
 	        	return {
 	        		body:res.body as AddressElement[],
-	        		pageCount:this.pageCount,
-	        		totalCount:this.totalCount,
+	        		pageCount:pageCount,
+	        		totalCount:totalCount,
 	        		pageIndex:pageIndex} as AddressResult;
 	        })
 	    );

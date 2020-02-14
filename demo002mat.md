@@ -244,97 +244,127 @@ A bit more has to be changed inside the controller. The whole part after the sav
 
 Let's start adding a new method to the service to handle the DataSource. The data source is nice because it handles all the pagination, ordering, filtering and sorting. For our example we will handle only the pagination, that was implemented via http headers on the server.
 
+First we need to import globally the paginator on app.module.ts
+
+	import { MatPaginatorModule } from '@angular/material/paginator';
+
+And load it in the imports
+
+	  imports: [
+	    ...
+	    MatPaginatorModule,
+	  ],
+
 ### Modify the service
 
-We need to import the HttpHeaders
+We need to import the HttpHeaders and rxjs. The latter is needed to map the result from the request to a consistent object 
 
 	import { HttpClient, HttpHeaders } from '@angular/common/http';
 	import { map } from 'rxjs/operators'; 
 
-We will not use sorting and filter. Just the pagination. Notice the weird map action, used for...no reason, it just works...
+We add a new type to return, containing the data for the pagination (this could be placed in a common part since its "type agnostic"
 
-	 public findAddresses(
-        addressId:number, filter = '', sortOrder = 'asc',
-        pageNumber = 0, pageSize = 3):  Observable<AddressElement> {
+	export interface AddressResult {
+		body: Object;
+		pageCount: number;
+		totalCount: number;
+		pageIndex:number;
+	}
+
+We will not use sorting and filter. Just the pagination. We are reading the data from the API that tells us the specification of the data, like the total count and the page index returned
+
+
+	public findAddresses(
+	    addressId:number = -1, filter = '', sortOrder = 'asc',
+	    pageNumber = 0, pageSize = 3):Observable<AddressResult> {
 
 		var headers = new HttpHeaders();
 		    	
-    	var address = this.baseUrl;
-    	if(addressId>=0){
-    		address+="/"+addressId;
-    	}else{
-    		headers = headers.set('X-Page',pageNumber.toString());
-    		headers = headers.set('X-PageSize',pageSize.toString());
-    	}
-    	
-        return this.http.get(address, {headers:headers}).pipe(
-            map(res =>  {var t=res["payload"];return res;}) 
-        );
-    }
-
-### The data source stub
-
-Now we can generate the dataSource
-
-	ng generate service addressDs
-
-And setup it as a real ds, adding the basic function connect and disconnect, injecting the AddressesDataService
-
-	import {CollectionViewer, DataSource} from "@angular/cdk/collections";
-	import { AddressesDataService, AddressElement } from './addresses-data.service';
-	import { BehaviorSubject, Observable } from 'rxjs';
-	import { of } from 'rxjs'; 
-	import { catchError, finalize } from 'rxjs/operators';  
-	
-	export class AddressesDs implements DataSource<AddressElement> {
-	
-	    private loadingSubject = new BehaviorSubject<boolean>(false);
-	
-	    public loading$ = this.loadingSubject.asObservable();
-	    private addressSubject = new BehaviorSubject<AddressElement[]>([]);
-	
-	    constructor(private addressesService: AddressesDataService) {}
-	
-	    connect(collectionViewer: CollectionViewer): Observable<Lesson[]> {
-	        return this.addressSubject.asObservable();
-	    }
-	
-	    disconnect(collectionViewer: CollectionViewer): void {
-	        this.addressSubject.complete();
-	        this.loadingSubject.complete();
-	    }
-	  
-	    loadAddresses(addressId: number, filter: string,
-	                sortDirection: string, pageIndex: number, pageSize: number) {
-	      
-	    }  
+		var address = this.baseUrl;
+		if(addressId>=0){
+			address+="/"+addressId;
+		}else{
+			headers = headers.set('X-Page',pageNumber.toString());
+			headers = headers.set('X-PageSize',pageSize.toString());
+		}
+		
+	    return this.http.get(address, {headers:headers, observe: "response"}).pipe(
+	        map(res =>  {
+	        	var pageCount =parseInt(res.headers.get('X-PageCount'));
+	        	var pageIndex =parseInt(res.headers.get('X-PageIndex'));
+	        	var totalCount =parseInt(res.headers.get('X-Count'));
+	        	return {
+	        		body:res.body as AddressElement[],
+	        		pageCount:pageCount,
+	        		totalCount:totalCount,
+	        		pageIndex:pageIndex} as AddressResult;
+	        })
+	    );
 	}
 
 
-### Load Addresses
-
-Subscription to the method called essentially
-
-    loadAddresses(addressId: number, filter = '',
-                sortDirection = 'asc', pageIndex = 0, pageSize = 3) {
-
-        this.loadingSubject.next(true);
-
-        this.addressesService.findAddresses(addressId, filter, sortDirection,
-            pageIndex, pageSize).pipe(
-            catchError(() => of([])),
-            finalize(() => this.loadingSubject.next(false))
-        )
-        .subscribe(addresses => this.addressSubject.next(addresses));
-    }  
-
 ### Changes in the controller
 
-The datasource must be imported
+We need to import 
 
-	import { AddressesDs } from '../addresses-sc.service';
+* AddressResult: the new class added
+* MatPaginator, PageEvent: The paginator object and the event produced
+* MatTableDataSource: The data source that we will use to show the results
 
-Added to the constructor and OnInit, with a variable
+	import { AddressesDataService, AddressElement, AddressResult } from '../addresses-data.service';
+	import { MatPaginator, PageEvent } from '@angular/material/paginator';
+	import { MatTable, MatTableDataSource } from '@angular/material/table';
+
+We setup a new variable for the paginator. The annotation tells angular to initialize the item only when everything is ready
+
+	@ViewChild(MatPaginator, { static: false }) 
+	paginator: MatPaginator;
+
+Then setup the data source and all the paginator variables
+
+	dataSource = new MatTableDataSource();
+	length: number;
+	pageIndex: number =0;
+	pageSize: number=3;
+	pageSizeOptions = [1, 5, 10, 50];
+
+And an event. That will be monitored and will update the paginator
+
+	pageEvent: PageEvent;
+
+Let's rewrite the getAddresses. It receives an event from paginator. If nothing is passed an empty object casted as an event is created filling the blanks with the default values.
+
+Then a subscription to findAddresses is created that updates the values shown. 
+
+Finally the event is returned. Prettu straightforward for now. Notice the cast to Array of AddressElement of the AddressResult
+
+	getAddresses(event?:PageEvent){
+		if(event==null){
+			event ={pageIndex:0,pageSize:this.pageSize} as PageEvent;
+		}
+		
+		this.dataService.findAddresses(-1,'','asc',event.pageIndex,event.pageSize).subscribe(
+				addresses =>{
+			      
+			        var a = addresses as AddressResult;
+					this.addresses=a.body as Array<AddressElement>;
+					this.dataSource.data = this.addresses;
+					this.length=a.totalCount;
+					this.pageIndex = a.pageIndex;
+			    },
+				error => {
+					console.log("error retrieving addresses");
+				}
+			);
+		return event;
+	}
+
+The onInit will be greatly simplified. Just call getAddresses
+
+	ngOnInit(): void {
+		this.getAddresses(null);
+	}
+
 
 	dataSource: AddressesDs;
 	constructor(public dataService: AddressesDataService) {}
@@ -344,10 +374,20 @@ Added to the constructor and OnInit, with a variable
 		this.dataSource.loadAddresses(-1);
 	}
 
-Now in the presentation it's enough to add the data source name on the controller
+### The html presentation
 
-	<table mat-table [dataSource]="dataSource" class="mat-elevation-z1" >
-		<ng-container matColumnDef="id">
-			<th mat-header-cell *matHeaderCellDef> Id</th>
-			<td mat-cell *matCellDef="let element"> {{element.id}} </td>
-		</ng-container>
+The dataSource will be changed to dataSource
+
+	<mat-table [dataSource]="dataSource" class="mat-elevation-z1" >
+
+We will add after the mat-table the following. #paginator tells Angular that a variable exists inside the controller with that value. The most interesting thing is the (page). This means that when the page is changed on the paginator an event is intercepted and sent to the controller!
+
+	<mat-paginator  #paginator
+	                [length]="length"
+	                [pageSize]="pageSize"
+	                [pageIndex]="pageIndex"
+	                [pageSizeOptions]="pageSizeOptions"
+	                (page)="pageEvent = getAddresses($event)">
+	</mat-paginator>
+
+The controller will then call the service to get the data and it will be shown :D

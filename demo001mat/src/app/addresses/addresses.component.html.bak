@@ -1,7 +1,7 @@
 <button mat-icon-button  color="primary" routerLink="/address/-1">
       <mat-icon>add</mat-icon>
 </button>
-<mat-table [dataSource]="addresses" class="mat-elevation-z1" >
+<table mat-table [dataSource]="addresses" class="mat-elevation-z1" >
 	<ng-container matColumnDef="id">
 		<mat-header-cell *matHeaderCellDef> Id</mat-header-cell>
 		<mat-cell *matCellDef="let element"> {{element.id}} </mat-cell>

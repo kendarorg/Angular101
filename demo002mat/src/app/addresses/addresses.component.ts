@@ -1,8 +1,6 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { AddressesDataService, AddressElement, AddressResult } from '../addresses-data.service';
-import { AddressesDs } from '../address-ds.service';
-
-import { MatPaginator,PageEvent } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 
 @Component({

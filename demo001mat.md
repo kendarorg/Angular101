@@ -247,16 +247,16 @@ At the end
  * mat-header-row: header template for the whole row, telling what cells must be shown
  * mat-row: template for a data row
 
-		<table mat-table [dataSource]="addresses" class="mat-elevation-z1" >
+		<mat-table [dataSource]="addresses" class="mat-elevation-z1" >
 			<ng-container matColumnDef="id">
-				<th mat-header-cell *matHeaderCellDef> Id</th>
-				<td mat-cell *matCellDef="let element"> {{element.id}} </td>
+				<mat-header-cell *matHeaderCellDef> Id</mat-header-cell>
+				<mat-cell *matCellDef="let element"> {{element.id}} </mat-cell>
 			</ng-container>
 			...
 		    
-			<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-			<tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-		</table>
+			<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+			<mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+		</mat-table>
 
 Finally to add some style, inside the addresses.component.less set the width to 100%
 
@@ -370,12 +370,12 @@ Noticed the **:id** this is to intend that the path will be in the form "address
 A new button is added to the table in addresses.component.html. This will follow the **routerLink** that we specified inside the routing. Note the slash in front of the address. This will make the address absolute!
 
 	<ng-container matColumnDef="view">
-      <th mat-header-cell *matHeaderCellDef></th>
-      <td mat-cell *matCellDef="let element">
+      <mat-header-cell *matHeaderCellDef></mat-header-cell>
+      <mat-cell *matCellDef="let element">
         <button mat-icon-button routerLink="/address/{{element.id}}">
-          <mat-icon>view</mat-icon>
+          <mat-icon>details</mat-icon>
         </button>
-      </td>
+      </mat-cell>
     </ng-container>
 
 Now clicking on the link you will be redirected to a fantastic "single-address works!"
