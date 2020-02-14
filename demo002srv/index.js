@@ -71,6 +71,8 @@
 		}
 		res.set('X-Count',addresses.length);
 		res.set('X-PageCount',result.length);
+		res.set('X-PageIndex',page);
+		res.set('access-control-expose-headers','*')
 	 	res.json(result);
 	});
 	

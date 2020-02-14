@@ -190,6 +190,8 @@ And in the response
 
  * X-Count: the total count of objects
  * X-PageCount: the number of items returned
+ * X-PageIndex: the current page
+ * access-control-expose-headers: all headers are readable by the browser
 
 	app.get("/api/address",cors(), (req, res, next) => {
 		var page=0;
@@ -208,6 +210,8 @@ And in the response
 		}
 		res.set('X-Count',addresses.length);
 		res.set('X-PageCount',result.length);
+		res.set('X-PageIndex',result.length);
+		res.set('access-control-expose-headers','*')
 	 	res.json(result);
 	});
 
