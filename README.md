@@ -9,6 +9,6 @@ Or install everything by hand :)
 
 ## Index
 
- * [Chapter 1: Basic addressbook app](demo001mat.md)
- * [Chapter 2 preparation: Rest API with express](demo002srv.md)
- * [Chapter 2: Header, Footer, Menu, Real API, DataSource Authentication](demo002mat.md)
+ * [Chapter 1: Basic addressbook app](https://www.kendar.org/?p=tutorials/angular9/demo001mat)
+ * [Chapter 2 preparation: Rest API with express](https://www.kendar.org/?p=tutorials/angular9/demo002srv)
+ * [Chapter 2: Header, Footer, Menu, Real API, DataSource Authentication](https://www.kendar.org/?p=tutorials/angular9/demo002mat)
