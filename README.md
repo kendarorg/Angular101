@@ -9,6 +9,31 @@ Or install everything by hand :)
 
 ## Index
 
- * [Chapter 1: Basic addressbook app](https://www.kendar.org/?p=tutorials/angular9/demo001mat)
- * [Chapter 2 preparation: Rest API with express](https://www.kendar.org/?p=tutorials/angular9/demo002srv)
- * [Chapter 2: Header, Footer, Menu, Real API, DataSource Authentication](https://www.kendar.org/?p=tutorials/angular9/demo002mat)
+<ul>
+<li class="markdown">Part 1: A simple crud
+
+<ul>
+<li class="markdown"><a href="?p=/tutorials/angular9/demo001mat#l001">Installation</a></li>
+<li class="markdown"><a href="?p=/tutorials/angular9/demo001mat_0generatedapp">The generated app</a></li>
+<li class="markdown"><a href="?p=/tutorials/angular9/demo001mat_1listofaddresses">The list of addresses</a></li>
+<li class="markdown"><a href="?p=/tutorials/angular9/demo001mat_2detail">The detail</a></li>
+<li class="markdown"><a href="?p=/tutorials/angular9/demo001mat_3detailediting">Editing the detail</a></li>
+<li class="markdown"><a href="?p=/tutorials/angular9/demo001mat_4validation">Validation</a></li>
+</ul></li>
+<li class="markdown">Part 2: A node.js express-based API
+
+<ul>
+<li class="markdown"><a href="?p=/tutorials/angular9/demo002srv">Setup Express</a></li>
+<li class="markdown"><a href="?p=/tutorials/angular9/demo002srv_0basic">Simple handler</a></li>
+<li class="markdown"><a href="?p=/tutorials/angular9/demo002srv_1pagination">Handling pagination</a></li>
+</ul></li>
+<li class="markdown">Part 3: Advanced material
+
+<ul>
+<li class="markdown"><a href="?p=/tutorials/angular9/demo002mat">Header and footer</a></li>
+<li class="markdown"><a href="?p=/tutorials/angular9/demo002mat_0toolbar">Toolbar</a></li>
+<li class="markdown"><a href="?p=/tutorials/angular9/demo002mat_1toolbarsubmenu">Submenus</a></li>
+<li class="markdown"><a href="?p=/tutorials/angular9/demo002mat_2realapi">Using a Real API</a></li>
+<li class="markdown"><a href="?p=/tutorials/angular9/demo002mat_3datasource">The DataSource object</a></li>
+</ul></li>
+</ul>
